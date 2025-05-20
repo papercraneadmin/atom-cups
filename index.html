@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Orbit Demo</title>
+  <style>
+
+    /* Deletable stuff */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fafafa;
+      font-family: Arial, sans-serif;
+    }
+
+    .demo-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .demo-text h1 {
+      font-size: 2.5rem;
+      color: #003f6f;
+    }
+    .demo-text h3 {
+      font-size: 1.5rem;
+      color: #666;
+    }
+    .demo-text .demo-button {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #ff9e1b;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    .demo-text .demo-button:hover {
+      background: #e58d18;
+    }
+
+    /* Orbit specific */
+    .orbit-section {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+      height: 100vh;
+    }
+    .demo-container {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      width: 90vw;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .media-orbit {
+      position: relative;
+      width: 50vw;
+      height: 50vw;
+      flex: 1;
+      left: 20vw;
+    }
+    .orbit-container {
+      position: relative;
+      width: 1px;
+      height: 1px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1vw;
+    }
+    .orbit-item {
+      position: absolute;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      transition: transform 5s ease, left 2.5s ease-in-out, top 2.5s ease-in-out;
+      z-index: 1;
+    }
+    .orbit-item:hover {
+      transform: scale(1.1);
+      z-index: 5;
+    }
+    .orbit-item img,
+    .orbit-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @media (max-width: 767px) {
+      /* Deletable stuff */
+      body {
+        flex-direction: column;
+        height: auto;
+      }
+      .demo-text {
+        width: 100%;
+        height: 35vh;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 1rem;
+      }
+
+      /* slider specific */
+      /* Working on it */
+      .demo-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+        max-width: none;
+      }
+      
+      .media-orbit {
+        width: 100%;
+        height: 65vh;
+        left: 0;
+      }
+      .orbit-container {
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        transform: none;
+        font-size: initial;
+      }
+      .orbit-item {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 1s ease;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .orbit-item.active {
+        opacity: 1;
+      }
+      .orbit-item:nth-child(1) { opacity: 1; } 
+    }
+  </style>
+</head>
+<body>
+  <section class="orbit-section">
+    <div class="demo-container">
+      <div class="demo-text">
+        <h4>Superheading</h4>
+        <h1>This is your heading</h1>
+        <h3>This is some supporting text to go with the heading.</h3>
+        <a href="#" class="demo-button">Learn More</a>
+      </div>
+      <div class="media-orbit">
+        <div class="orbit-container">
+          <div class="orbit-item" data-index="0">
+            <img src="media/image.jpg" alt="Image 1">
+          </div>
+          <div class="orbit-item" data-index="1">
+            <video muted loop playsinline webkit-playsinline>
+              <source src="media/video.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="orbit-item" data-index="2">
+            <img src="media/image.jpg" alt="Image 2">
+          </div>
+          <div class="orbit-item" data-index="3">
+            <video muted loop playsinline webkit-playsinline>
+              <source src="media/video.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="orbit-item" data-index="4">
+            <img src="media/image.jpg" alt="Image 3">
+          </div>
+          <div class="orbit-item" data-index="4">
+            <img src="media/image.jpg" alt="Image 3">
+          </div>
+          <div class="orbit-item" data-index="4">
+            <img src="media/image.jpg" alt="Image 3">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll('video').forEach(v => {
+        v.muted = true;
+        v.play().catch(() => {});
+      });
+
+      const isMobile = window.innerWidth <= 767;
+      const container = document.querySelector('.orbit-container');
+      const items = container.querySelectorAll('.orbit-item');
+      const count = items.length;
+
+      if (isMobile) {
+        let idx = 0;
+        items.forEach(i => i.classList.remove('active'));
+        items[0].classList.add('active');
+        setInterval(() => {
+          items[idx].classList.remove('active');
+          idx = (idx + 1) % count;
+          items[idx].classList.add('active');
+        }, 8000); 
+      } else {
+        // Easily changeable multiplier to scale the size of orbit items
+        const sizeMultiplier = 1.2;
+
+        const minCount = 3, maxCount = 8, minEm = 20, maxEm = 8;
+        const clamped = Math.min(Math.max(count, minCount), maxCount);
+        const sizeEm = ((minEm + (clamped - minCount) * (maxEm - minEm) / (maxCount - minCount)) * sizeMultiplier).toFixed(2);
+        items.forEach(item => {
+          item.style.width = `${sizeEm}em`;
+          item.style.height = `${sizeEm}em`;
+        });
+
+        const offset = -Math.PI / 2;
+        let rot = 0, step = 360 / count;
+        const fullRadius = (50 / 3) * (window.innerWidth / 100);
+        const inwardRadius = fullRadius * 0.85;
+
+        function positionItems(r, rotation) {
+          items.forEach((item, i) => {
+            const rect = item.getBoundingClientRect();
+            const w = rect.width, h = rect.height;
+            const angle = offset + (2 * Math.PI * i / count);
+            const x = r * Math.cos(angle);
+            const y = r * Math.sin(angle);
+            item.style.left = `${x - w / 2}px`;
+            item.style.top = `${y - h / 2}px`;
+            item.style.transform = `rotate(${-rotation}deg)`;
+          });
+        }
+
+        container.style.transition = "transform 5s ease";
+        items.forEach(item => item.style.transition = "transform 5s ease, left 2.5s ease-in-out, top 2.5s ease-in-out");
+
+        function animateInOut(callback) {
+          positionItems(inwardRadius, rot);
+          setTimeout(() => {
+            callback();
+            setTimeout(() => {
+              positionItems(fullRadius, rot);
+            }, 2500);
+          }, 2500);
+        }
+
+        function update() {
+          rot += step;
+          container.style.transform = `rotate(${rot}deg)`;
+          animateInOut(() => {
+            positionItems(fullRadius, rot);
+          });
+        }
+
+        positionItems(fullRadius, rot);
+        setTimeout(() => { update(); setInterval(update, 8000); }, 3000);
+      }
+    });
+  </script>
+</body>
+</html>
