@@ -3,6 +3,32 @@
 $jsonData = file_get_contents('data.json');
 $data = json_decode($jsonData, true);
 $orbitItems = $data['orbitItems'];
+
+/**
+ * ACF Block Integration
+ * 
+ * To use this as an ACF block in WordPress:
+ * 
+ * 1. Replace the JSON data loading with ACF fields:
+ *    $heading = get_field('heading');
+ *    $superheading = get_field('superheading');
+ *    $subheading = get_field('subheading');
+ *    $link = get_field('link');
+ *    $orbitItems = get_field('media_items');
+ * 
+ * 2. Check for minimum/maximum items in the repeater:
+ *    if (count($orbitItems) < 3) { 
+ *        // Show error or fallback content
+ *    }
+ *    $orbitItems = array_slice($orbitItems, 0, 8); // Limit to maximum 8
+ * 
+ * 3. Adjust HTML structure below to use ACF fields instead of hardcoded content
+ *    Replace static text with $heading, $superheading, $subheading, etc.
+ *    Use $link['url'], $link['title'], $link['target'] for the button
+ * 
+ * 4. For media items, check type based on file extension:
+ *    $isVideo = in_array(pathinfo($item['file']['url'], PATHINFO_EXTENSION), ['mp4', 'webm']);
+ */
 ?>
 <!DOCTYPE html>
 <html lang="en">
