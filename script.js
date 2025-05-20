@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function() {
-  // Initialize all videos
   document.querySelectorAll('video').forEach(v => {
     v.muted = true;
     v.play().catch(() => {});
@@ -7,18 +6,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
   const isMobile = window.innerWidth <= 767;
 
-  // Handle mobile hero slider
   if (isMobile) {
     initMobileSlider();
   } else {
-    // Handle desktop orbit
     initDesktopOrbit();
   }
 
-  // Listen for window resize to handle responsive behavior
   window.addEventListener('resize', function() {
     const currentIsMobile = window.innerWidth <= 767;
-    // Only reload if we crossed the mobile/desktop threshold
     if (currentIsMobile !== isMobile) {
       location.reload();
     }
@@ -34,31 +29,24 @@ function initMobileSlider() {
   let currentIndex = 0;
   let previousIndex = count - 1;
   
-  // Function to handle slide transition
   function nextSlide() {
-    // Mark the current active slide as previous
     sliderItems[currentIndex].classList.remove('active');
     sliderItems[currentIndex].classList.add('prev');
     
-    // Calculate next index
     previousIndex = currentIndex;
     currentIndex = (currentIndex + 1) % count;
     
-    // Remove prev class from all other slides
     sliderItems.forEach((item, i) => {
       if (i !== previousIndex) {
         item.classList.remove('prev');
       }
       
-      // Reset transform for the incoming slide
       if (i === currentIndex) {
-        // Force browser to acknowledge the change
         void item.offsetWidth;
         item.classList.add('active');
       }
     });
     
-    // Make sure videos play on the active slide
     const activeVideo = sliderItems[currentIndex].querySelector('video');
     if (activeVideo) {
       activeVideo.currentTime = 0;
@@ -66,10 +54,8 @@ function initMobileSlider() {
     }
   }
 
-  // Initial setup
   sliderItems[0].classList.add('active');
   
-  // Auto-advance slides
   setInterval(nextSlide, 8000);
 }
 
@@ -93,24 +79,37 @@ function initDesktopOrbit() {
 
   const offset = -Math.PI / 2;
   let rot = 0, step = 360 / count;
-  const fullRadius = (50 / 3) * (window.innerWidth / 100);
+  
+  const baseRadius = 16; 
+  const fullRadius = baseRadius;
   const inwardRadius = fullRadius * 0.85;
+  
+  const rotationDuration = 4000; // 5s * 0.8 = 4s
+  const transitionDuration = rotationDuration;
+  const halfTransitionDuration = transitionDuration / 2;
+  const easingFunction = 'cubic-bezier(0.45, 0, 0.55, 1)';
 
   function positionItems(r, rotation) {
     items.forEach((item, i) => {
       const rect = item.getBoundingClientRect();
       const w = rect.width, h = rect.height;
       const angle = offset + (2 * Math.PI * i / count);
-      const x = r * Math.cos(angle);
-      const y = r * Math.sin(angle);
+      const remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const radiusPx = r * remToPx;
+      
+      const x = radiusPx * Math.cos(angle);
+      const y = radiusPx * Math.sin(angle);
       item.style.left = `${x - w / 2}px`;
       item.style.top = `${y - h / 2}px`;
       item.style.transform = `rotate(${-rotation}deg)`;
     });
   }
-
-  container.style.transition = "transform 5s ease";
-  items.forEach(item => item.style.transition = "transform 5s ease, left 2.5s ease-in-out, top 2.5s ease-in-out");
+  container.style.transition = `transform ${rotationDuration}ms ${easingFunction}`;
+  items.forEach(item => {
+    item.style.transition = `transform ${rotationDuration}ms ${easingFunction}, 
+                             left ${halfTransitionDuration}ms ${easingFunction}, 
+                             top ${halfTransitionDuration}ms ${easingFunction}`;
+  });
 
   function animateInOut(callback) {
     positionItems(inwardRadius, rot);
@@ -118,8 +117,8 @@ function initDesktopOrbit() {
       callback();
       setTimeout(() => {
         positionItems(fullRadius, rot);
-      }, 2500);
-    }, 2500);
+      }, 0);
+    }, halfTransitionDuration);
   }
 
   function update() {
@@ -131,5 +130,5 @@ function initDesktopOrbit() {
   }
 
   positionItems(fullRadius, rot);
-  setTimeout(() => { update(); setInterval(update, 8000); }, 3000);
+  setTimeout(() => { update(); setInterval(update, 6400); }, 3000); 
 } 
