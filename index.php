@@ -2,6 +2,7 @@
 // Load JSON data
 $jsonData = file_get_contents('data.json');
 $data = json_decode($jsonData, true);
+$content = $data['content'];
 $orbitItems = $data['orbitItems'];
 
 /**
@@ -44,24 +45,26 @@ $orbitItems = $data['orbitItems'];
   <section class="orbit-section desktop-only">
     <div class="demo-container">
       <div class="demo-text">
-        <h4>Superheading</h4>
-        <h1>This is your heading</h1>
-        <h3>This is some supporting text to go with the heading.</h3>
-        <a href="#" class="demo-button">Learn More</a>
+        <h4><?= $content['superheading'] ?></h4>
+        <h1><?= $content['heading'] ?></h1>
+        <h3><?= $content['subheading'] ?></h3>
+        <a href="<?= $content['link']['url'] ?>" class="demo-button" <?= $content['link']['target'] ? 'target="' . $content['link']['target'] . '"' : '' ?>><?= $content['link']['text'] ?></a>
       </div>
       <div class="media-orbit">
-        <div class="orbit-container">
-          <?php foreach($orbitItems as $index => $item): ?>
-            <div class="orbit-item" data-index="<?= $index ?>">
-              <?php if($item['type'] === 'image'): ?>
-                <img src="<?= $item['src'] ?>" alt="<?= $item['alt'] ?>">
-              <?php elseif($item['type'] === 'video'): ?>
-                <video muted loop playsinline webkit-playsinline>
-                  <source src="<?= $item['src'] ?>" type="video/mp4">
-                </video>
-              <?php endif; ?>
-            </div>
-          <?php endforeach; ?>
+        <div class="orbit-container-wrapper">
+          <div class="orbit-container">
+            <?php foreach($orbitItems as $index => $item): ?>
+              <div class="orbit-item" data-index="<?= $index ?>">
+                <?php if(!empty($item['video'])): ?>
+                  <video muted loop autoplay playsinline webkit-playsinline>
+                    <source src="<?= $item['video'] ?>" type="video/mp4">
+                  </video>
+                <?php else: ?>
+                  <img src="<?= $item['image'] ?>" alt="<?= $item['alt'] ?>">
+                <?php endif; ?>
+              </div>
+            <?php endforeach; ?>
+          </div>
         </div>
       </div>
     </div>
@@ -72,22 +75,22 @@ $orbitItems = $data['orbitItems'];
     <div class="slider">
       <?php foreach($orbitItems as $index => $item): ?>
         <div class="slider-item <?= $index === 0 ? 'active' : '' ?>" data-index="<?= $index ?>">
-          <?php if($item['type'] === 'image'): ?>
-            <img src="<?= $item['src'] ?>" alt="<?= $item['alt'] ?>">
-          <?php elseif($item['type'] === 'video'): ?>
+          <?php if(!empty($item['video'])): ?>
             <video muted loop autoplay playsinline webkit-playsinline>
-              <source src="<?= $item['src'] ?>" type="video/mp4">
+              <source src="<?= $item['video'] ?>" type="video/mp4">
             </video>
+          <?php else: ?>
+            <img src="<?= $item['image'] ?>" alt="<?= $item['alt'] ?>">
           <?php endif; ?>
         </div>
       <?php endforeach; ?>
     </div>
     
     <div class="content">
-      <h4>Superheading</h4>
-      <h1>This is your heading</h1>
-      <h3>This is some supporting text to go with the heading.</h3>
-      <a href="#" class="demo-button">Learn More</a>
+      <h4><?= $content['superheading'] ?></h4>
+      <h1><?= $content['heading'] ?></h1>
+      <h3><?= $content['subheading'] ?></h3>
+      <a href="<?= $content['link']['url'] ?>" class="demo-button" <?= $content['link']['target'] ? 'target="' . $content['link']['target'] . '"' : '' ?>><?= $content['link']['text'] ?></a>
     </div>
   </section>
 </body>

@@ -67,7 +67,8 @@ function initDesktopOrbit() {
   if (count === 0) return;
 
   // Easily changeable multiplier to scale the size of orbit items
-  const sizeMultiplier = 1.2;
+  const sizeMultiplier = 2.5;
+  const radiusMultiplier = 2.3;
 
   const minCount = 3, maxCount = 8, minEm = 20, maxEm = 8;
   const clamped = Math.min(Math.max(count, minCount), maxCount);
@@ -80,11 +81,11 @@ function initDesktopOrbit() {
   const offset = -Math.PI / 2;
   let rot = 0, step = 360 / count;
   
-  const baseRadius = 16; 
+  const baseRadius = 16 * radiusMultiplier; 
   const fullRadius = baseRadius;
   const inwardRadius = fullRadius * 0.85;
   
-  const rotationDuration = 4000; // 5s * 0.8 = 4s
+  const rotationDuration = 4000;
   const transitionDuration = rotationDuration;
   const halfTransitionDuration = transitionDuration / 2;
   const easingFunction = 'cubic-bezier(0.45, 0, 0.55, 1)';

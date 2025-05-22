@@ -55,7 +55,7 @@ add_action('init', 'register_acf_blocks');
 - **Subheading** (Textarea)
 - **Link** (Link)
 - **Media Items** (Repeater - min: 3, max: 8)
-  - **Media File** (File - allow video/image)
-  - **Thumbnail** (Image - used as backup for videos)
+  - **Image** 
+  - **Video** (File - restrict to video)
 
 4. Copy the code from index.php, style.css, and script.js to your block directory, and adjust as needed based on the commented instructions in the template.

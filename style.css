@@ -76,6 +76,13 @@ body {
   flex: 1;
   margin-left: 4rem;
 }
+
+.orbit-container-wrapper {
+  position:relative;
+  width:100%;
+  height:100%;
+  transform:translateX(30vw);
+}
 .orbit-container {
   position: relative;
   width: 1px;

@@ -1,39 +1,29 @@
 {
+  "content": {
+    "superheading": "Superheading",
+    "heading": "This is your heading",
+    "subheading": "This is some supporting text to go with the heading.",
+    "link": {
+      "url": "#",
+      "text": "Learn More",
+      "target": "_self"
+    }
+  },
   "orbitItems": [
     {
-      "type": "image",
-      "src": "media/image.jpg",
+      "image": "media/image.jpg",
+      "video": "",
       "alt": "Image 1"
     },
     {
-      "type": "video",
-      "src": "media/video.mp4",
+      "image": "",
+      "video": "media/video.mp4",
       "alt": "Video 1"
     },
     {
-      "type": "image",
-      "src": "media/image.jpg",
+      "image": "media/image.jpg",
+      "video": "",
       "alt": "Image 2"
-    },
-    {
-      "type": "video",
-      "src": "media/video.mp4",
-      "alt": "Video 2"
-    },
-    {
-      "type": "image",
-      "src": "media/image.jpg",
-      "alt": "Image 3"
-    },
-    {
-      "type": "image",
-      "src": "media/image.jpg",
-      "alt": "Image 4"
-    },
-    {
-      "type": "image",
-      "src": "media/image.jpg",
-      "alt": "Image 5"
     }
   ]
 } 
