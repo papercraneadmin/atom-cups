@@ -66,28 +66,49 @@ function initDesktopOrbit() {
   
   if (count === 0) return;
 
-  // Easily changeable multiplier to scale the size of orbit items
-  const sizeMultiplier = 2.5;
-  const radiusMultiplier = 2.3;
+  // Define multipliers based on item count
+  const multipliers = {
+    3: { size: 1.8, radius: 1.8 },
+    4: { size: 1.6, radius: 1.8 },
+    5: { size: 1.6, radius: 1.8 },
+    6: { size: 1.8, radius: 1.8 },
+    7: { size: 1.8, radius: 2.0 },
+    8: { size: 2.5, radius: 2.1 }
+  };
+  
+  // Default fallback multipliers
+  let sizeMultiplier = 1.8;
+  let radiusMultiplier = 1.8;
+  
+  // Set multipliers based on count
+  if (multipliers[count]) {
+    sizeMultiplier = multipliers[count].size;
+    radiusMultiplier = multipliers[count].radius;
+  }
 
   const minCount = 3, maxCount = 8, minEm = 20, maxEm = 8;
   const clamped = Math.min(Math.max(count, minCount), maxCount);
   const sizeEm = ((minEm + (clamped - minCount) * (maxEm - minEm) / (maxCount - minCount)) * sizeMultiplier).toFixed(2);
   items.forEach(item => {
-    item.style.width = `${sizeEm}em`;
-    item.style.height = `${sizeEm}em`;
+    item.style.width = `${sizeEm}rem`;
+    item.style.height = `${sizeEm}rem`;
   });
 
   const offset = -Math.PI / 2;
   let rot = 0, step = 360 / count;
   
-  const baseRadius = 16 * radiusMultiplier; 
-  const fullRadius = baseRadius;
+  // Base radius size in REMs with multiplier
+  const baseRadius = 16;
+  const fullRadius = baseRadius * radiusMultiplier;
   const inwardRadius = fullRadius * 0.85;
   
-  const rotationDuration = 4000;
+  // Speed up animation by 20% (reduce duration)
+  const rotationDuration = 4000; // 5s * 0.8 = 4s
   const transitionDuration = rotationDuration;
   const halfTransitionDuration = transitionDuration / 2;
+  
+  // Use the same symmetrical cubic-bezier for all animations
+  // This creates a perfect ease-in-out where acceleration and deceleration are mirrored
   const easingFunction = 'cubic-bezier(0.45, 0, 0.55, 1)';
 
   function positionItems(r, rotation) {
