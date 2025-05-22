@@ -97,18 +97,14 @@ function initDesktopOrbit() {
   const offset = -Math.PI / 2;
   let rot = 0, step = 360 / count;
   
-  // Base radius size in REMs with multiplier
   const baseRadius = 16;
   const fullRadius = baseRadius * radiusMultiplier;
   const inwardRadius = fullRadius * 0.85;
   
-  // Speed up animation by 20% (reduce duration)
   const rotationDuration = 4000; // 5s * 0.8 = 4s
   const transitionDuration = rotationDuration;
   const halfTransitionDuration = transitionDuration / 2;
   
-  // Use the same symmetrical cubic-bezier for all animations
-  // This creates a perfect ease-in-out where acceleration and deceleration are mirrored
   const easingFunction = 'cubic-bezier(0.45, 0, 0.55, 1)';
 
   function positionItems(r, rotation) {
