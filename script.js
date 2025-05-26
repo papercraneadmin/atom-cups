@@ -66,24 +66,37 @@ function initDesktopOrbit() {
   
   if (count === 0) return;
 
-  // Define multipliers based on item count
+  // Per # of items, set the size, radius, and degOffset
   const multipliers = {
-    3: { size: 1.8, radius: 1.8 },
-    4: { size: 1.6, radius: 1.8 },
-    5: { size: 1.6, radius: 1.8 },
-    6: { size: 1.8, radius: 1.8 },
-    7: { size: 1.8, radius: 2.0 },
-    8: { size: 2.5, radius: 2.1 }
+    3: { size: 1.8, radius: 1.8, degOffset: 30 },
+    4: { size: 1.6, radius: 1.8, degOffset: 0 },
+    5: { size: 1.6, radius: 1.8, degOffset: 55 },
+    6: { size: 1.8, radius: 1.8, degOffset: 30 },
+    7: { size: 1.8, radius: 2.0, degOffset: 10 },
+    8: { size: 2.5, radius: 2.1, degOffset: 0 }
   };
   
-  // Default fallback multipliers
+  // modify the radius and size on small screens
+  const smallScreenMultipliers = {
+    radiusMultiplier: 0.6,
+    sizeMultiplier: 0.7
+  };
+  
+  const isSmallScreen = window.innerWidth >= 767 && window.innerWidth <= 1150;
+  
   let sizeMultiplier = 1.8;
   let radiusMultiplier = 1.8;
+  let degOffset = 0;
   
-  // Set multipliers based on count
   if (multipliers[count]) {
     sizeMultiplier = multipliers[count].size;
     radiusMultiplier = multipliers[count].radius;
+    degOffset = multipliers[count].degOffset;
+  }
+  
+  if (isSmallScreen) {
+    sizeMultiplier *= smallScreenMultipliers.sizeMultiplier;
+    radiusMultiplier *= smallScreenMultipliers.radiusMultiplier;
   }
 
   const minCount = 3, maxCount = 8, minEm = 20, maxEm = 8;
@@ -94,14 +107,15 @@ function initDesktopOrbit() {
     item.style.height = `${sizeEm}rem`;
   });
 
-  const offset = -Math.PI / 2;
-  let rot = 0, step = 360 / count;
+  const offset = -Math.PI / 2 + (degOffset * Math.PI / 180); 
+  let rot = 0;  
+  let step = 360 / count;
   
   const baseRadius = 16;
   const fullRadius = baseRadius * radiusMultiplier;
   const inwardRadius = fullRadius * 0.85;
   
-  const rotationDuration = 4000; // 5s * 0.8 = 4s
+  const rotationDuration = 4000;
   const transitionDuration = rotationDuration;
   const halfTransitionDuration = transitionDuration / 2;
   
@@ -122,6 +136,7 @@ function initDesktopOrbit() {
       item.style.transform = `rotate(${-rotation}deg)`;
     });
   }
+
   container.style.transition = `transform ${rotationDuration}ms ${easingFunction}`;
   items.forEach(item => {
     item.style.transition = `transform ${rotationDuration}ms ${easingFunction}, 
@@ -131,8 +146,10 @@ function initDesktopOrbit() {
 
   function animateInOut(callback) {
     positionItems(inwardRadius, rot);
+    
     setTimeout(() => {
       callback();
+      
       setTimeout(() => {
         positionItems(fullRadius, rot);
       }, 0);
@@ -140,13 +157,33 @@ function initDesktopOrbit() {
   }
 
   function update() {
-    rot += step;
+    rot += step; 
     container.style.transform = `rotate(${rot}deg)`;
     animateInOut(() => {
       positionItems(fullRadius, rot);
     });
   }
 
+  container.style.transform = `rotate(0deg)`;
   positionItems(fullRadius, rot);
-  setTimeout(() => { update(); setInterval(update, 6400); }, 3000); 
+  
+  let lastUpdateTime = Date.now();
+  const updateInterval = 6400;
+  
+  function scheduleNextUpdate() {
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastUpdateTime;
+    
+    if (timeSinceLastUpdate >= updateInterval - 100) {
+      lastUpdateTime = now;
+      update();
+    }
+
+    setTimeout(scheduleNextUpdate, 100);
+  }
+  setTimeout(() => {
+    lastUpdateTime = Date.now();
+    update();
+    scheduleNextUpdate();
+  }, 3000);
 } 
