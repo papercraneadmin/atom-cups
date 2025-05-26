@@ -28,6 +28,8 @@ function initMobileSlider() {
 
   let currentIndex = 0;
   let previousIndex = count - 1;
+  let intervalId = null;
+  let hiddenTime = null;
   
   function nextSlide() {
     sliderItems[currentIndex].classList.remove('active');
@@ -54,51 +56,35 @@ function initMobileSlider() {
     }
   }
 
-  sliderItems[0].classList.add('active');
-  
-  let animationId = null;
-  let lastAnimationTime = performance.now();
-  let accumulatedTime = 0;
-  const slideInterval = 8000;
-  let isRunning = true;
-  
-  function animate(currentTime) {
-    if (!isRunning) {
-      animationId = null;
-      return;
-    }
+  function startSlider() {
+    sliderItems.forEach(item => item.classList.remove('active', 'prev'));
+    sliderItems[0].classList.add('active');
+    currentIndex = 0;
+    previousIndex = count - 1;
     
-         const deltaTime = currentTime - lastAnimationTime;
-     lastAnimationTime = currentTime;
-     
-     if (!document.hidden) {
-       accumulatedTime += deltaTime;
-       
-       if (accumulatedTime >= slideInterval) {
-         accumulatedTime = accumulatedTime % slideInterval;
-         nextSlide();
-       }
-     }
-    
-    animationId = requestAnimationFrame(animate);
+    if (intervalId) clearInterval(intervalId);
+    intervalId = setInterval(nextSlide, 8000);
   }
-  
-     function handleVisibilityChange() {
-     if (!document.hidden) {
-       lastAnimationTime = performance.now();
-     }
-   }
-   
-   document.addEventListener('visibilitychange', handleVisibilityChange);
-   
-   animationId = requestAnimationFrame(animate);
-  window.addEventListener('beforeunload', () => {
-    isRunning = false;
-    if (animationId) {
-      cancelAnimationFrame(animationId);
+
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      hiddenTime = Date.now();
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    } else {
+      if (hiddenTime && Date.now() - hiddenTime > 5000) {
+        startSlider();
+      } else if (!intervalId) {
+        intervalId = setInterval(nextSlide, 8000);
+      }
+      hiddenTime = null;
     }
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-  });
+  }
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  startSlider();
 }
 
 function initDesktopOrbit() {
@@ -108,7 +94,6 @@ function initDesktopOrbit() {
   
   if (count === 0) return;
 
-  // Per # of items, set the size, radius, and degOffset
   const multipliers = {
     3: { size: 1.8, radius: 1.8, degOffset: 30 },
     4: { size: 1.6, radius: 1.8, degOffset: 0 },
@@ -118,7 +103,6 @@ function initDesktopOrbit() {
     8: { size: 2.5, radius: 2.1, degOffset: 0 }
   };
   
-  // modify the radius and size on small screens
   const smallScreenMultipliers = {
     radiusMultiplier: 0.6,
     sizeMultiplier: 0.7
@@ -163,6 +147,9 @@ function initDesktopOrbit() {
   
   const easingFunction = 'cubic-bezier(0.45, 0, 0.55, 1)';
 
+  let intervalId = null;
+  let hiddenTime = null;
+
   function positionItems(r, rotation) {
     items.forEach((item, i) => {
       const rect = item.getBoundingClientRect();
@@ -206,66 +193,54 @@ function initDesktopOrbit() {
     });
   }
 
-  container.style.transform = `rotate(0deg)`;
-  positionItems(fullRadius, rot);
-  
-  let animationId = null;
-  let lastAnimationTime = performance.now();
-  let accumulatedTime = 0;
-  const updateInterval = 6400;
-  let isRunning = false;
-  
-  function animate(currentTime) {
-    if (!isRunning) {
-      animationId = null;
-      return;
-    }
+  function startOrbit() {
+    rot = 0;
     
-         const deltaTime = currentTime - lastAnimationTime;
-     lastAnimationTime = currentTime;
-     
-     if (!document.hidden) {
-       accumulatedTime += deltaTime;
-       
-       if (accumulatedTime >= updateInterval) {
-         accumulatedTime = accumulatedTime % updateInterval;
-         update();
-       }
-     }
+    container.style.transition = 'none';
+    items.forEach(item => {
+      item.style.transition = 'none';
+    });
     
-    animationId = requestAnimationFrame(animate);
+    container.style.transform = `rotate(0deg)`;
+    positionItems(fullRadius, rot);
+    
+    setTimeout(() => {
+      container.style.transition = `transform ${rotationDuration}ms ${easingFunction}`;
+      items.forEach(item => {
+        item.style.transition = `transform ${rotationDuration}ms ${easingFunction}, 
+                                 left ${halfTransitionDuration}ms ${easingFunction}, 
+                                 top ${halfTransitionDuration}ms ${easingFunction}`;
+      });
+    }, 50);
+    
+    if (intervalId) clearInterval(intervalId);
+    
+    setTimeout(() => {
+      update();
+      intervalId = setInterval(update, 6400);
+    }, 3000);
   }
-  
-  function startAnimation() {
-    if (!isRunning) {
-      isRunning = true;
-      lastAnimationTime = performance.now();
-      animationId = requestAnimationFrame(animate);
+
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      hiddenTime = Date.now();
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    } else {
+      if (hiddenTime && Date.now() - hiddenTime > 5000) {
+        startOrbit();
+      } else if (!intervalId) {
+        setTimeout(() => {
+          update();
+          intervalId = setInterval(update, 6400);
+        }, 3000);
+      }
+      hiddenTime = null;
     }
   }
-  
-  function stopAnimation() {
-    isRunning = false;
-    if (animationId) {
-      cancelAnimationFrame(animationId);
-      animationId = null;
-    }
-  }
-  
-     function handleVisibilityChange() {
-     if (!document.hidden) {
-       lastAnimationTime = performance.now();
-     }
-   }
-  
-     document.addEventListener('visibilitychange', handleVisibilityChange);
-   
-   setTimeout(() => {
-     update();
-     startAnimation();
-   }, 3000);
-  window.addEventListener('beforeunload', () => {
-    stopAnimation();
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-  });
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  startOrbit();
 } 
