@@ -56,7 +56,49 @@ function initMobileSlider() {
 
   sliderItems[0].classList.add('active');
   
-  setInterval(nextSlide, 8000);
+  let animationId = null;
+  let lastAnimationTime = performance.now();
+  let accumulatedTime = 0;
+  const slideInterval = 8000;
+  let isRunning = true;
+  
+  function animate(currentTime) {
+    if (!isRunning) {
+      animationId = null;
+      return;
+    }
+    
+         const deltaTime = currentTime - lastAnimationTime;
+     lastAnimationTime = currentTime;
+     
+     if (!document.hidden) {
+       accumulatedTime += deltaTime;
+       
+       if (accumulatedTime >= slideInterval) {
+         accumulatedTime = accumulatedTime % slideInterval;
+         nextSlide();
+       }
+     }
+    
+    animationId = requestAnimationFrame(animate);
+  }
+  
+     function handleVisibilityChange() {
+     if (!document.hidden) {
+       lastAnimationTime = performance.now();
+     }
+   }
+   
+   document.addEventListener('visibilitychange', handleVisibilityChange);
+   
+   animationId = requestAnimationFrame(animate);
+  window.addEventListener('beforeunload', () => {
+    isRunning = false;
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+    }
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  });
 }
 
 function initDesktopOrbit() {
@@ -167,23 +209,63 @@ function initDesktopOrbit() {
   container.style.transform = `rotate(0deg)`;
   positionItems(fullRadius, rot);
   
-  let lastUpdateTime = Date.now();
+  let animationId = null;
+  let lastAnimationTime = performance.now();
+  let accumulatedTime = 0;
   const updateInterval = 6400;
+  let isRunning = false;
   
-  function scheduleNextUpdate() {
-    const now = Date.now();
-    const timeSinceLastUpdate = now - lastUpdateTime;
-    
-    if (timeSinceLastUpdate >= updateInterval - 100) {
-      lastUpdateTime = now;
-      update();
+  function animate(currentTime) {
+    if (!isRunning) {
+      animationId = null;
+      return;
     }
-
-    setTimeout(scheduleNextUpdate, 100);
+    
+         const deltaTime = currentTime - lastAnimationTime;
+     lastAnimationTime = currentTime;
+     
+     if (!document.hidden) {
+       accumulatedTime += deltaTime;
+       
+       if (accumulatedTime >= updateInterval) {
+         accumulatedTime = accumulatedTime % updateInterval;
+         update();
+       }
+     }
+    
+    animationId = requestAnimationFrame(animate);
   }
-  setTimeout(() => {
-    lastUpdateTime = Date.now();
-    update();
-    scheduleNextUpdate();
-  }, 3000);
+  
+  function startAnimation() {
+    if (!isRunning) {
+      isRunning = true;
+      lastAnimationTime = performance.now();
+      animationId = requestAnimationFrame(animate);
+    }
+  }
+  
+  function stopAnimation() {
+    isRunning = false;
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+  }
+  
+     function handleVisibilityChange() {
+     if (!document.hidden) {
+       lastAnimationTime = performance.now();
+     }
+   }
+  
+     document.addEventListener('visibilitychange', handleVisibilityChange);
+   
+   setTimeout(() => {
+     update();
+     startAnimation();
+   }, 3000);
+  window.addEventListener('beforeunload', () => {
+    stopAnimation();
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  });
 } 
