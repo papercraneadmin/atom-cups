@@ -21,33 +21,46 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function initMobileSlider() {
-  const sliderItems = document.querySelectorAll('.hero-slider .slider-item');
+  const sliderItems = document.querySelectorAll('.hero-slider .slider .slider-item');
   const count = sliderItems.length;
   
   if (count === 0) return;
 
   let currentIndex = 0;
-  let previousIndex = count - 1;
   let intervalId = null;
   let hiddenTime = null;
   
-  function nextSlide() {
-    sliderItems[currentIndex].classList.remove('active');
-    sliderItems[currentIndex].classList.add('prev');
+  const crossfadeDuration = 1000;
+  const easingFunction = 'cubic-bezier(0.45, 0, 0.55, 1)';
+  
+  sliderItems.forEach((item, i) => {
+    item.classList.remove('prev');
+    item.style.position = 'absolute';
+    item.style.top = '0';
+    item.style.left = '0';
+    item.style.width = '100%';
+    item.style.height = '100%';
+    item.style.transform = 'translateX(0)';
+    item.style.transition = `opacity ${crossfadeDuration}ms ${easingFunction}`;
     
-    previousIndex = currentIndex;
+    if (i === 0) {
+      item.classList.add('active');
+      item.style.opacity = '1';
+    } else {
+      item.classList.remove('active');
+      item.style.opacity = '0';
+    }
+  });
+  
+  function nextSlide() {
+    const previousIndex = currentIndex;
     currentIndex = (currentIndex + 1) % count;
     
-    sliderItems.forEach((item, i) => {
-      if (i !== previousIndex) {
-        item.classList.remove('prev');
-      }
-      
-      if (i === currentIndex) {
-        void item.offsetWidth;
-        item.classList.add('active');
-      }
-    });
+    sliderItems[previousIndex].classList.remove('active');
+    sliderItems[currentIndex].classList.add('active');
+    
+    sliderItems[previousIndex].style.opacity = '0';
+    sliderItems[currentIndex].style.opacity = '1';
     
     const activeVideo = sliderItems[currentIndex].querySelector('video');
     if (activeVideo) {
@@ -57,10 +70,18 @@ function initMobileSlider() {
   }
 
   function startSlider() {
-    sliderItems.forEach(item => item.classList.remove('active', 'prev'));
-    sliderItems[0].classList.add('active');
+
+    sliderItems.forEach((item, i) => {
+      item.classList.remove('prev');
+      if (i === 0) {
+        item.classList.add('active');
+        item.style.opacity = '1';
+      } else {
+        item.classList.remove('active');
+        item.style.opacity = '0';
+      }
+    });
     currentIndex = 0;
-    previousIndex = count - 1;
     
     if (intervalId) clearInterval(intervalId);
     intervalId = setInterval(nextSlide, 8000);
@@ -169,7 +190,7 @@ function initDesktopOrbit() {
     });
     items.forEach((item, i) => {
       if (i === leftmostIndex) {
-        item.style.transform = `rotate(${-rotation}deg) scale(1.35)`; //this scales up the item when it's in the active position
+        item.style.transform = `rotate(${-rotation}deg) scale(1.35)`;
       } else {
         item.style.transform = `rotate(${-rotation}deg) scale(1)`;
       }
@@ -178,16 +199,17 @@ function initDesktopOrbit() {
 
   function positionItems(r, rotation) {
     items.forEach((item, i) => {
-      const rect = item.getBoundingClientRect();
-      const w = rect.width, h = rect.height;
       const angle = offset + (2 * Math.PI * i / count);
       const remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
       const radiusPx = r * remToPx;
       
+
+      const baseSizePx = parseFloat(sizeEm) * remToPx;
+      
       const x = radiusPx * Math.cos(angle);
       const y = radiusPx * Math.sin(angle);
-      item.style.left = `${x - w / 2}px`;
-      item.style.top = `${y - h / 2}px`;
+      item.style.left = `${x - baseSizePx / 2}px`;
+      item.style.top = `${y - baseSizePx / 2}px`;
     });
     
     updateActiveItem(rotation);
