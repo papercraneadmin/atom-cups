@@ -150,6 +150,32 @@ function initDesktopOrbit() {
   let intervalId = null;
   let hiddenTime = null;
 
+  function updateActiveItem(rotation) {
+    let leftmostIndex = 0;
+    let leftmostX = Infinity;
+    
+    items.forEach((item, i) => {
+      const angle = offset + (2 * Math.PI * i / count);
+      const remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const radiusPx = fullRadius * remToPx;
+      
+      const totalAngle = angle + (rotation * Math.PI / 180);
+      const x = radiusPx * Math.cos(totalAngle);
+      
+      if (x < leftmostX) {
+        leftmostX = x;
+        leftmostIndex = i;
+      }
+    });
+    items.forEach((item, i) => {
+      if (i === leftmostIndex) {
+        item.style.transform = `rotate(${-rotation}deg) scale(1.35)`; //this scales up the item when it's in the active position
+      } else {
+        item.style.transform = `rotate(${-rotation}deg) scale(1)`;
+      }
+    });
+  }
+
   function positionItems(r, rotation) {
     items.forEach((item, i) => {
       const rect = item.getBoundingClientRect();
@@ -162,8 +188,9 @@ function initDesktopOrbit() {
       const y = radiusPx * Math.sin(angle);
       item.style.left = `${x - w / 2}px`;
       item.style.top = `${y - h / 2}px`;
-      item.style.transform = `rotate(${-rotation}deg)`;
     });
+    
+    updateActiveItem(rotation);
   }
 
   container.style.transition = `transform ${rotationDuration}ms ${easingFunction}`;
